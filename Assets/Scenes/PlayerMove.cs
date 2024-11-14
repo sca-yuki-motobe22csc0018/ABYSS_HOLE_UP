@@ -13,9 +13,12 @@ public class PlayerMove : MonoBehaviour
     public float BoundForce;
     public GameObject PlayerSkin;
     [SerializeField] Rigidbody2D rb = new Rigidbody2D();
+    public float PowerMaxTime;
+    float PowerTimer;
     // Start is called before the first frame update
     void Start()
     {
+        PowerTimer = 0;
         rb = GetComponent<Rigidbody2D>();
         this.transform.position = StartPosition;
     }
@@ -23,36 +26,37 @@ public class PlayerMove : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        float applySpeed = speed * Time.deltaTime;
-        SetDirection();
-        dir += new Vector3(x, y, 0).normalized * applySpeed;
-        //PlayerSkin.transform.Rotate(0,0, -x *100* Time.deltaTime);
-        rb.velocity = dir;
-    }
+        if (Input.GetMouseButton(0)&&PowerTimer<PowerMaxTime)
+        {
+            PowerTimer += Time.deltaTime;
+        }
+        if (Input.GetMouseButtonUp(0))
+        {
+            PowerTimer = 0;
+        }
+        // マウスのスクリーン座標を取得
+        Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        mousePosition.z = 0f; // 2DなのでZ座標は無視
 
-    void SetDirection()
-    {
-        if (Input.GetKeyDown(KeyCode.W))
-        {
-            y = 1;
-        }
-        if (Input.GetKeyDown(KeyCode.S))
-        {
-            y = -1;
-        }
+        // オブジェクトの位置からマウスの位置までのベクトルを計算
+        Vector2 direction = mousePosition - transform.position;
 
-        if (Input.GetKeyDown(KeyCode.D))
+        // ベクトルの角度を取得して回転させる
+        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+        PlayerSkin.transform.rotation = Quaternion.Euler(new Vector3(0, 0, angle));
+        if (PlayerSkin.transform.rotation.z > 0.7f || PlayerSkin.transform.rotation.z < -0.7f)
         {
-            x = 1;
+            PlayerSkin.transform.localScale = new Vector3(-0.5f, -0.5f, 1);
         }
-        if (Input.GetKeyDown(KeyCode.A))
+        else
         {
-            x = -1;
+            PlayerSkin.transform.localScale = new Vector3(-0.5f, 0.5f, 1);
         }
+        
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
-    {
+    {/*
         if (collision.gameObject.CompareTag("Wall"))
         {
             rb.velocity = new Vector3(0, 0, 0);
@@ -69,5 +73,6 @@ public class PlayerMove : MonoBehaviour
             x = 0;
             y = 0;
         }
+     */
     }
 }
