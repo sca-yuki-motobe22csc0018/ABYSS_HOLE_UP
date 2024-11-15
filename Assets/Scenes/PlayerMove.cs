@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class PlayerMove : MonoBehaviour
 {
@@ -15,6 +16,8 @@ public class PlayerMove : MonoBehaviour
     [SerializeField] Rigidbody2D rb = new Rigidbody2D();
     public float PowerMaxTime;
     float PowerTimer;
+    float PowerTimeStock;
+    private Vector3 moveDirection; // 移動方向
     // Start is called before the first frame update
     void Start()
     {
@@ -32,7 +35,12 @@ public class PlayerMove : MonoBehaviour
         }
         if (Input.GetMouseButtonUp(0))
         {
+            // カメラからクリック位置へのRayを作成
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             PowerTimer = 0;
+            RaycastHit hit;
+            // ヒットした位置から方向を計算
+            moveDirection = (hit.point - transform.position).normalized;
         }
         // マウスのスクリーン座標を取得
         Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
